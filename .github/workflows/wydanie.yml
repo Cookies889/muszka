@@ -1,0 +1,72 @@
+# Wydanie: tag v* buduje Muszkę na Windows (instalator NSIS po polsku), podpisuje paczkę
+# aktualizacji kluczem z sekretu TAURI_SIGNING_PRIVATE_KEY i publikuje Release z latest.json.
+# Przed wydaniem próba dymna: zbudowany muszka.exe musi żyć 15 s, inaczej wydania nie ma.
+# Aplikacja co 6 h pyta https://github.com/Cookies889/muszka/releases/latest/download/latest.json
+name: wydanie
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Lista zmian dla znajomego bierze się z ZMIANY.md, nie z treści commita.
+      - name: Lista zmian z ZMIANY.md
+        id: zmiany
+        shell: bash
+        run: |
+          wersja="${GITHUB_REF_NAME#v}"
+          awk -v w="## $wersja" '{ sub(/\r$/, "") } $0 == w { t = 1; next } /^## / { t = 0 } t && NF' ZMIANY.md > zmiany.txt
+          if [ ! -s zmiany.txt ]; then echo "::error::ZMIANY.md nie ma punktów dla wersji $wersja"; exit 1; fi
+          { echo 'tekst<<KONIEC_ZMIAN'; cat zmiany.txt; echo 'KONIEC_ZMIAN'; } >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - run: npm ci
+      - name: Testy
+        run: npm test
+      # Najpierw sam build (bez wydania), żeby próba dymna mogła zatrzymać złą wersję.
+      - name: Build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npx tauri build
+      - name: Próba dymna (muszka.exe żyje po 15 s)
+        shell: pwsh
+        run: |
+          $exe = "src-tauri\target\release\muszka.exe"
+          if (-not (Test-Path $exe)) { Write-Error "Nie ma $exe"; exit 1 }
+          $p = Start-Process -FilePath $exe -PassThru
+          Start-Sleep -Seconds 15
+          $zywy = Get-Process -Id $p.Id -ErrorAction SilentlyContinue
+          if (-not $zywy) {
+            Write-Error "muszka.exe nie żyje po 15 s (kod wyjścia: $($p.ExitCode))"
+            exit 1
+          }
+          Write-Host "PROBA DYMNA OK: muszka.exe zyje po 15 s (PID $($p.Id), pamiec $([math]::Round($zywy.WorkingSet64 / 1MB)) MB)"
+          Stop-Process -Id $p.Id -Force
+      # Build jest już w cache, tauri-action dokłada wydanie z instalatorem i latest.json.
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: Muszka ${{ github.ref_name }}
+          releaseBody: ${{ steps.zmiany.outputs.tekst }}
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Muszka</title>
+    <link rel="stylesheet" href="./src/styl.css" />
+  </head>
+  <body>
+    <header class="pasek">
+      <div class="marka">
+        <svg width="22" height="22" viewBox="0 0 512 512" aria-hidden="true"><rect x="24" y="24" width="464" height="464" rx="112" fill="#161A16"/><circle cx="256" cy="256" r="138" fill="none" stroke="#3BE04A" stroke-width="44"/><rect x="226" y="226" width="60" height="60" rx="8" fill="#3BE04A"/></svg>
+        <span>Muszka</span>
+      </div>
+
+      <button class="wlacznik" id="wlacznik" type="button" role="switch" aria-checked="true">
+        <span class="wlacznik-tor" aria-hidden="true"><span class="wlacznik-galka"></span></span>
+        <span id="wlacznik-tekst">Nakładka włączona</span>
+      </button>
+
+      <div class="pole-paska">
+        <span class="etyk" id="skrot-etyk">Skrót</span>
+        <button class="skrot" id="skrot" type="button" aria-labelledby="skrot-etyk skrot" aria-describedby="skrot-blad">Alt+Shift+Z</button>
+      </div>
+
+      <label class="pole-paska">
+        <span class="etyk">Monitor</span>
+        <select id="monitor"></select>
+      </label>
+
+      <label class="opcja">
+        <input type="checkbox" id="tylko-cs2" />
+        <span>Tylko gdy CS2 na wierzchu</span>
+      </label>
+    </header>
+    <p class="komunikat blad pasek-blad" id="skrot-blad" role="alert" hidden></p>
+
+    <main class="uklad">
+      <section class="scena" aria-label="Podgląd celownika">
+        <div class="scena-gora">
+          <div class="segmenty" role="radiogroup" aria-label="Tło podglądu" id="tla"></div>
+          <label class="opcja">
+            <input type="checkbox" id="lupa-wl" checked />
+            <span>Lupa ×4</span>
+          </label>
+        </div>
+
+        <div class="podglad" id="podglad" data-tlo="mur" role="img" aria-label="Celownik w skali 1:1">
+          <div class="podglad-rysunek" id="rysunek"></div>
+          <div class="lupa" id="lupa" aria-hidden="true"></div>
+        </div>
+
+        <div class="zapisane">
+          <div class="zapisane-gora">
+            <h2 class="etyk">Zapisane</h2>
+            <form class="zapisz-jako" id="zapisz-jako">
+              <input type="text" id="nazwa" maxlength="40" placeholder="Nazwa celownika" aria-label="Nazwa nowego celownika" />
+              <button type="submit">Zapisz jako</button>
+            </form>
+          </div>
+          <ul class="lista" id="lista" aria-label="Zapisane celowniki"></ul>
+          <p class="komunikat" id="lista-info" role="status"></p>
+        </div>
+      </section>
+
+      <aside class="ustawienia" aria-label="Ustawienia celownika">
+        <fieldset class="grupa">
+          <legend class="etyk">Kształt</legend>
+          <div class="ksztalty" id="ksztalty"></div>
+        </fieldset>
+
+        <fieldset class="grupa">
+          <legend class="etyk">Kolor</legend>
+          <div class="kolory">
+            <div class="probki" id="probki" role="radiogroup" aria-label="Gotowe kolory"></div>
+            <label class="kolor-wlasny">
+              <input type="color" id="kolor" />
+              <span id="kolor-hex">#3BE04A</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="grupa">
+          <legend class="etyk">Wymiary w pikselach</legend>
+          <div class="wiersze" id="wymiary"></div>
+        </fieldset>
+
+        <fieldset class="grupa">
+          <legend class="etyk">Kropka, obrys, krycie</legend>
+          <div class="wiersze" id="dodatki"></div>
+        </fieldset>
+
+        <fieldset class="grupa">
+          <legend class="etyk">Przesunięcie od środka</legend>
+          <div class="wiersze" id="przesuniecie"></div>
+        </fieldset>
+
+        <fieldset class="grupa">
+          <legend class="etyk"><label for="kod">Kod z CS2</label></legend>
+          <form class="kod" id="kod-form">
+            <input type="text" id="kod" spellcheck="false" autocomplete="off" placeholder="Wklej kod z CS2" aria-describedby="kod-info" />
+            <button type="submit">Wczytaj</button>
+          </form>
+          <p class="komunikat" id="kod-info" role="status"></p>
+        </fieldset>
+      </aside>
+    </main>
+
+    <footer class="stopka">
+      <p class="wskazowka">W CS2 ustaw <b>Tryb wyświetlania: Pełny ekran w oknie</b>. W wyłącznym pełnym ekranie Windows nie rysuje okien nad grą.</p>
+      <p class="komunikat blad" id="blad" role="alert" hidden></p>
+      <span class="aktualizacja" id="aktualizacja" hidden>
+        <span id="aktualizacja-tekst" role="status"></span>
+        <button type="button" id="aktualizuj" hidden>Zaktualizuj i uruchom ponownie</button>
+      </span>
+      <span class="wersja" id="wersja"></span>
+    </footer>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

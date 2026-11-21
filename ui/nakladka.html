@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Muszka: celownik</title>
+    <style>
+      /* Okno nakladki jest przezroczyste: widac tylko piksele celownika. */
+      html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; }
+      #celownik { position: fixed; inset: 0; pointer-events: none; }
+      #celownik svg { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="celownik"></div>
+    <script type="module" src="./src/nakladka.ts"></script>
+  </body>
+</html>
