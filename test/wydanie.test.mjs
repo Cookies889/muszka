@@ -37,7 +37,7 @@ test('CZYTAJ.md mowi o trybie ekranu, skrocie, zasobniku i SmartScreen', () => {
 
 test('ZMIANY.md ma wpis dla wersji z tauri.conf.json', () => {
   const { version } = JSON.parse(czytaj('src-tauri/tauri.conf.json'));
-  assert.match(czytaj('ZMIANY.md'), new RegExp(`^## ${version.replaceAll('.', '\\.')}\\n- `, 'm'));
+  assert.match(czytaj('ZMIANY.md').replace(/\r\n/g, '\n'), new RegExp(`^## ${version.replaceAll('.', '\\.')}\\n- `, 'm'));
 });
 
 test('.gitignore nie wpuszcza kluczy ani notatek planu', () => {
